@@ -18,6 +18,44 @@ const companies = {
   LT: "https://www.moneycontrol.com/india/stockpricequote/constructioncontracting-civil/larsentoubro/LT",
 };
 
+// Google Sheets
+const { google } = require("googleapis");
+const fs = require("fs");
+
+// Load credentials
+const credentials = require("./credentials.json");
+
+async function writeToSheet(data) {
+  const auth = new google.auth.GoogleAuth({
+    credentials,
+    scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+  });
+
+  const sheets = google.sheets({ version: "v4", auth: await auth.getClient() });
+
+  const spreadsheetId = "1BoLT_UZgvD2XHdZnNwDjMELSO983sv-Vb9mawJfSRoc";
+
+  const values = data.map((item) => [
+    item.name,
+    item.Strength,
+    item.Weakness,
+    item.Opportunity,
+    item.Threat,
+    item.Mc_Essentials,
+    new Date().toLocaleString(),
+  ]);
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: "Sheet1",
+    valueInputOption: "USER_ENTERED",
+    resource: {
+      values, // ✅ put values here, not under `requestBody`
+    },
+  });
+}
+
+// Web Scraping
 async function scrapeCompany(page, name, url) {
   try {
     await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
@@ -83,6 +121,7 @@ async function scrapeCompany(page, name, url) {
     const result = await scrapeCompany(page, name, url);
     results.push(result);
   }
+  writeToSheet(results);
 
   console.table(results);
 
