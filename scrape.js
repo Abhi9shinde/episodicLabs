@@ -16,15 +16,26 @@ const companies = {
     "https://www.moneycontrol.com/india/stockpricequote/banks-private-sector/kotakmahindrabank/KMB",
   ITC: "https://www.moneycontrol.com/india/stockpricequote/cigarettes/itc/ITC",
   LT: "https://www.moneycontrol.com/india/stockpricequote/constructioncontracting-civil/larsentoubro/LT",
+  TECH_MAHINDRA:
+    "https://www.moneycontrol.com/india/stockpricequote/computers-software/techmahindra/TM4",
 };
 
 // Google Sheets
 const { google } = require("googleapis");
-const fs = require("fs");
 
 // Load credentials
-const credentials = require("./credentials.json");
+const fs = require("fs");
+let credentials;
 
+if (process.env.GOOGLE_SHEETS_CREDENTIALS) {
+  // GitHub Actions
+  fs.writeFileSync("credentials.json", process.env.GOOGLE_SHEETS_CREDENTIALS);
+  credentials = require("./credentials.json");
+} else {
+  // Local development
+  credentials = require("./credentials.json");
+}
+// Function to write data to Google Sheets
 async function writeToSheet(data) {
   const auth = new google.auth.GoogleAuth({
     credentials,
@@ -34,6 +45,18 @@ async function writeToSheet(data) {
   const sheets = google.sheets({ version: "v4", auth: await auth.getClient() });
 
   const spreadsheetId = "1BoLT_UZgvD2XHdZnNwDjMELSO983sv-Vb9mawJfSRoc";
+
+  const headers = [
+    [
+      "Name",
+      "Strength",
+      "Weakness",
+      "Opportunity",
+      "Threat",
+      "MC Essential Score",
+      "Timestamp",
+    ],
+  ];
 
   const values = data.map((item) => [
     item.name,
@@ -45,12 +68,15 @@ async function writeToSheet(data) {
     new Date().toLocaleString(),
   ]);
 
-  await sheets.spreadsheets.values.append({
+  // Combine header + data
+  const allRows = [...headers, ...values];
+
+  await sheets.spreadsheets.values.update({
     spreadsheetId,
     range: "Sheet1",
     valueInputOption: "USER_ENTERED",
     resource: {
-      values,
+      values: allRows,
     },
   });
 }
