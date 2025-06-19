@@ -28,13 +28,15 @@ const fs = require("fs");
 let credentials;
 
 if (process.env.GOOGLE_SHEETS_CREDENTIALS) {
-  // GitHub Actions
-  fs.writeFileSync("credentials.json", process.env.GOOGLE_SHEETS_CREDENTIALS);
-  credentials = require("./credentials.json");
+  // On GitHub Actions - parse and write to file
+  const decoded = JSON.parse(process.env.GOOGLE_SHEETS_CREDENTIALS);
+  fs.writeFileSync("credentials.json", JSON.stringify(decoded, null, 2));
+  credentials = decoded;
 } else {
-  // Local development
+  // Local machine - load the already present file
   credentials = require("./credentials.json");
 }
+
 // Function to write data to Google Sheets
 async function writeToSheet(data) {
   const auth = new google.auth.GoogleAuth({
