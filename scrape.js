@@ -2,6 +2,8 @@ const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 puppeteer.use(StealthPlugin());
 
+const delay = (ms) => new Promise((res) => setTimeout(res, ms));
+
 const companies = {
   RELIANCE:
     "https://www.moneycontrol.com/india/stockpricequote/refineries/relianceindustries/RI",
@@ -137,12 +139,15 @@ async function scrapeCompany(page, name, url) {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    protocolTimeout: 180000, // extend protocol timeout
+    timeout: 120000, // extend launch timeout
   });
 
   const page = await browser.newPage();
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
   );
+
   await page.setViewport({ width: 1280, height: 800 });
 
   const results = [];
@@ -151,6 +156,7 @@ async function scrapeCompany(page, name, url) {
     console.log(`Scraping ${name}...`);
     const result = await scrapeCompany(page, name, url);
     results.push(result);
+    await delay(3000);
   }
   writeToSheet(results);
 
