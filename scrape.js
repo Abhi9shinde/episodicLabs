@@ -139,11 +139,14 @@ async function scrapeCompany(page, name, url) {
   const browser = await puppeteer.launch({
     headless: true,
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
-    protocolTimeout: 180000, // extend protocol timeout
+    // protocolTimeout: 180000, // extend protocol timeout
     timeout: 120000, // extend launch timeout
   });
 
   const page = await browser.newPage();
+  page.setDefaultTimeout(60000); // Page actions timeout
+  page.setDefaultNavigationTimeout(120000); // Navigation timeout
+
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36"
   );
