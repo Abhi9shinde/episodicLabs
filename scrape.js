@@ -37,7 +37,7 @@ async function writeToSheet(data) {
 
   const values = data.map((item) => [
     item.name,
-    item.Strength,
+    item.Strengths,
     item.Weakness,
     item.Opportunity,
     item.Threat,
@@ -50,7 +50,7 @@ async function writeToSheet(data) {
     range: "Sheet1",
     valueInputOption: "USER_ENTERED",
     resource: {
-      values, // ✅ put values here, not under `requestBody`
+      values,
     },
   });
 }
