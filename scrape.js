@@ -1,4 +1,6 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+puppeteer.use(StealthPlugin());
 
 const companies = {
   RELIANCE:
@@ -86,7 +88,7 @@ async function writeToSheet(data) {
 // Web Scraping
 async function scrapeCompany(page, name, url) {
   try {
-    await page.goto(url, { waitUntil: "networkidle2", timeout: 60000 });
+    await page.goto(url, { waitUntil: "networkidle2", timeout: 120000 });
 
     // Waiting for the Strength element to appear
     await page.waitForSelector("#swot_ls strong", { timeout: 10000 });
